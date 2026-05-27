@@ -474,6 +474,10 @@ async def send_email_async(recipient: str, subject: str, html_content: str, atta
         return {"status": "error", "message": str(e)}
 
 # Auth Routes
+@api_router.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @api_router.post("/auth/register", response_model=User)
 async def register(user_data: UserCreate):
     existing = await db.users.find_one({"email": user_data.email}, {"_id": 0})
@@ -4801,10 +4805,27 @@ async def _reminder_loop():
             logger.error(f"Reminder loop error: {e}")
         await asyncio.sleep(REMINDER_INTERVAL_HOURS * 60 * 60)
 
+SELF_PING_INTERVAL_SECONDS = 14 * 60  # 14 minutes
+
+async def _self_ping_loop():
+    """Keep the server alive on free-tier hosts by pinging its own health endpoint."""
+    import httpx
+    await asyncio.sleep(30)  # let the server fully start first
+    base_url = os.environ.get('SELF_URL', 'http://localhost:8001')
+    while True:
+        try:
+            async with httpx.AsyncClient() as client_http:
+                r = await client_http.get(f"{base_url}/api/health", timeout=10)
+            logger.info(f"Self-ping OK ({r.status_code})")
+        except Exception as e:
+            logger.warning(f"Self-ping failed: {e}")
+        await asyncio.sleep(SELF_PING_INTERVAL_SECONDS)
+
 @app.on_event("startup")
 async def _start_reminder_scheduler():
     asyncio.create_task(_reminder_loop())
-    logger.info("Invoice reminder scheduler started")
+    asyncio.create_task(_self_ping_loop())
+    logger.info("Invoice reminder scheduler and self-ping started")
 
 
 @app.on_event("shutdown")
