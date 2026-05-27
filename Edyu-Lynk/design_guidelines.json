@@ -1,0 +1,118 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Coaching Center App",
+      "archetype": "Swiss Utility",
+      "tone": "Professional, Efficient, Trustworthy",
+      "theme_mode": "light",
+      "visual_style": "High clarity, density-optimized, tactile utility"
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Plus Jakarta Sans, sans-serif",
+        "body": "Public Sans, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-4xl font-bold tracking-tight",
+        "h2": "text-3xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold",
+        "h4": "text-xl font-medium",
+        "body_lg": "text-lg leading-relaxed",
+        "body_base": "text-base leading-relaxed text-slate-600",
+        "caption": "text-sm text-slate-500 font-medium tracking-wide uppercase"
+      }
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "DEFAULT": "#1E3A8A",
+          "foreground": "#FFFFFF",
+          "hover": "#172554"
+        },
+        "secondary": {
+          "DEFAULT": "#F1F5F9",
+          "foreground": "#0F172A"
+        },
+        "accent": {
+          "DEFAULT": "#F97316",
+          "foreground": "#FFFFFF"
+        },
+        "background": "#F8FAFC",
+        "card": "#FFFFFF",
+        "border": "#E2E8F0",
+        "success": "#10B981",
+        "destructive": "#EF4444",
+        "warning": "#F59E0B"
+      },
+      "usage": {
+        "sidebar_bg": "#FFFFFF",
+        "header_bg": "rgba(255, 255, 255, 0.8)",
+        "grid_border": "#E2E8F0"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "section_gap": "gap-8",
+      "component_radius": "rounded-md"
+    },
+    "layout": {
+      "dashboard_grid": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "bento_cells": {
+        "hero": "col-span-full md:col-span-8 row-span-2",
+        "sidebar": "col-span-full md:col-span-4 row-span-2",
+        "stat_small": "col-span-full md:col-span-4",
+        "list_tall": "col-span-full md:col-span-4 row-span-2"
+      }
+    },
+    "motion": {
+      "page_transition": {
+        "initial": { "opacity": 0, "y": 20 },
+        "animate": { "opacity": 1, "y": 0 },
+        "exit": { "opacity": 0, "y": -20 },
+        "transition": { "duration": 0.3, "ease": "easeOut" }
+      },
+      "micro_interactions": {
+        "hover_lift": "hover:-translate-y-1 transition-transform duration-200",
+        "button_press": "active:scale-95 transition-transform duration-100"
+      }
+    }
+  },
+  "assets": {
+    "images": {
+      "login_bg": "https://images.unsplash.com/photo-1765638647849-f525bece7ca4?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "student_avatars": [
+        "https://images.unsplash.com/photo-1543689604-6fe8dbcd1f59?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "https://images.unsplash.com/photo-1758270705641-acf09b68a91f?crop=entropy&cs=srgb&fm=jpg&q=85"
+      ],
+      "teacher_avatars": [
+        "https://images.unsplash.com/photo-1758685734511-4f49ce9a382b?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "https://images.unsplash.com/photo-1758685845906-6f705cde4fb7?crop=entropy&cs=srgb&fm=jpg&q=85"
+      ]
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "stroke-width=1.5"
+    }
+  },
+  "components": {
+    "buttons": "rounded-md font-medium transition-all shadow-sm hover:shadow-md active:shadow-none",
+    "cards": "bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow",
+    "inputs": "rounded-md border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-900/10 transition-colors",
+    "tables": "w-full border-collapse [&_tr]:border-b [&_tr]:border-slate-100 [&_th]:text-slate-500 [&_th]:font-medium [&_th]:uppercase [&_th]:tracking-wider [&_th]:text-xs [&_td]:py-4"
+  },
+  "instructions_to_main_agent": [
+    "INSTALL_DEPENDENCIES: yarn add framer-motion lucide-react date-fns recharts @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-select @radix-ui/react-slot @radix-ui/react-toast class-variance-authority clsx tailwind-merge",
+    "THEME_SETUP: Update tailwind.config.js to use the 'Swiss Utility' color palette defined in this JSON. Replace the default 'zinc' or 'slate' approach with our specific hex codes.",
+    "LAYOUT_STRATEGY: Use a 'Sidebar Layout' for the dashboard. The sidebar should be fixed on desktop, drawer on mobile.",
+    "ATTENDANCE_UI: Do NOT use a simple table. Create a grid of student cards (AttendanceCard) that can be clicked to toggle status (Present -> Absent -> Late).",
+    "INVOICE_UI: Create a dedicated 'InvoicePreview' component that looks like a real paper invoice (white box, shadow, print styles).",
+    "TESTING: Add data-testid to all interactive elements (buttons, inputs, cards). Format: 'page-section-element'.",
+    "ROLES: Ensure the sidebar menu filters items based on user role (Admin: all, Teacher: Attendance/Classes, Student: Fees/Profile)."
+  ],
+  "UNIVERSAL_GUIDELINES": {
+    "do_not_use": ["gradients on text", "rounded-full buttons (unless icon only)", "default blue links"],
+    "accessibility": "Ensure 4.5:1 contrast for all text. Use aria-labels for icon-only buttons.",
+    "responsive": "Mobile-first. Tables must have horizontal scroll on mobile or switch to card view."
+  }
+}

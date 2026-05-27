@@ -1,0 +1,60 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #163d65;
+  --primary-light: #1a5fa8;
+  --secondary: #d4a800;
+  --accent: #c0155a;
+  --green: #0d9668;
+  --bg: #ffffff;
+  --bg-card: #f5f7fa;
+  --bg-card2: #eaeff5;
+  --text: #0d1f3c;
+  --text-muted: #5a6e88;
+  --border: rgba(22, 61, 101, 0.14);
+  --glow-blue: 0 4px 24px rgba(22, 61, 101, 0.10);
+  --glow-gold: 0 4px 24px rgba(212, 168, 0, 0.15);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  line-height: 1.2;
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; outline: none; }
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-card); }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+/* STEMXplore brand gradient */
+.brand-gradient {
+  background: linear-gradient(145deg, #9f025e, #f9c929);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

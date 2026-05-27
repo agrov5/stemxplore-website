@@ -1,0 +1,142 @@
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 64px 24px 0;
+  background: var(--bg-card);
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 2fr;
+  gap: 80px;
+  padding-bottom: 48px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.logoImg {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+}
+
+.tagline {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  font-style: italic;
+  max-width: 300px;
+}
+
+.socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.socials a {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(22, 61, 101, 0.06);
+}
+
+.socials a:hover {
+  background: rgba(22, 61, 101, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.col h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.col a {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.col a:hover { color: var(--primary-light); }
+
+.bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-top: 1px solid var(--border);
+  padding: 20px 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bottom p {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+}
+
+.legal {
+  display: flex;
+  gap: 20px;
+}
+
+.legal a {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.legal a:hover { color: var(--text); }
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .links { grid-template-columns: repeat(2, 1fr); }
+  .bottom { flex-direction: column; align-items: flex-start; }
+  .footer { padding-top: 48px; }
+}
