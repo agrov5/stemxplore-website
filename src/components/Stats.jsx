@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './Stats.module.css'
 
-const STATS = [
+const FALLBACK_STATS = [
   { value: 1000, suffix: '+', label: 'Students Trained' },
   { value: 10, suffix: '+', label: 'Years Experience' },
   { value: 10, suffix: '+', label: 'Courses Offered' },
@@ -29,6 +29,17 @@ function Counter({ target, suffix, active }) {
 export default function Stats() {
   const ref = useRef(null)
   const [active, setActive] = useState(false)
+  const [stats, setStats] = useState(FALLBACK_STATS)
+
+  useEffect(() => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
+    fetch(`${backendUrl}/api/website/stats`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setStats(data)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -42,7 +53,7 @@ export default function Stats() {
   return (
     <section className={styles.stats} ref={ref}>
       <div className={styles.inner}>
-        {STATS.map(s => (
+        {stats.map(s => (
           <div key={s.label} className={styles.stat}>
             <div className={styles.number}>
               <Counter target={s.value} suffix={s.suffix} active={active} />

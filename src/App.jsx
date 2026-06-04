@@ -4,6 +4,7 @@ import Hero from './components/Hero'
 import Stats from './components/Stats'
 import About from './components/About'
 import Programs from './components/Programs'
+import Gallery from './components/Gallery'
 import Values from './components/Values'
 import Trainer from './components/Trainer'
 import Contact from './components/Contact'
@@ -24,6 +25,7 @@ function App() {
       <Stats />
       <About />
       <Programs />
+      <Gallery />
       <Values />
       <Trainer />
       <Contact />

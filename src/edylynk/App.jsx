@@ -24,6 +24,7 @@ import FinancialReports from '@/pages/FinancialReports';
 import DataImport from '@/pages/DataImport';
 import Settings from '@/pages/Settings';
 import UserManagement from '@/pages/UserManagement';
+import WebsiteManager from '@/pages/WebsiteManager';
 import '@/index.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -180,6 +181,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <UserManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/website"
+        element={
+          <ProtectedRoute>
+            <WebsiteManager />
           </ProtectedRoute>
         }
       />

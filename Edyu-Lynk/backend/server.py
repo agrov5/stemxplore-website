@@ -4663,6 +4663,120 @@ async def run_reminders_now():
     return {"message": "Reminder pass complete"}
 
 
+# ── Website Manager Models ──────────────────────────────────────────────────
+
+class GalleryItemCreate(BaseModel):
+    url: str
+    type: Literal['photo', 'video'] = 'photo'
+    caption: str = ""
+
+class GalleryItem(GalleryItemCreate):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class WebsiteProgramCreate(BaseModel):
+    title: str
+    description: str
+    badge: str = ""
+    image_url: str = ""
+    highlights: List[str] = []
+    color: str = "#1a5fa8"
+    order: int = 0
+
+class WebsiteProgram(WebsiteProgramCreate):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class WebsiteStat(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    value: int
+    suffix: str = "+"
+    label: str
+
+DEFAULT_WEBSITE_STATS = [
+    {"id": "stat-1", "value": 1000, "suffix": "+", "label": "Students Trained"},
+    {"id": "stat-2", "value": 10, "suffix": "+", "label": "Years Experience"},
+    {"id": "stat-3", "value": 10, "suffix": "+", "label": "Courses Offered"},
+    {"id": "stat-4", "value": 4, "suffix": " Age Groups", "label": "Served"},
+]
+
+
+# ── Website Gallery Routes ───────────────────────────────────────────────────
+
+@api_router.get("/website/gallery")
+async def get_gallery():
+    items = await db.gallery.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return items
+
+@api_router.post("/website/gallery")
+async def add_gallery_item(item: GalleryItemCreate):
+    obj = GalleryItem(**item.model_dump())
+    doc = obj.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.gallery.insert_one(doc)
+    return obj
+
+@api_router.delete("/website/gallery/{item_id}")
+async def delete_gallery_item(item_id: str):
+    result = await db.gallery.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Gallery item not found")
+    return {"message": "Deleted"}
+
+
+# ── Website Programs Routes ──────────────────────────────────────────────────
+
+@api_router.get("/website/programs")
+async def get_website_programs():
+    programs = await db.website_programs.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return programs
+
+@api_router.post("/website/programs")
+async def create_website_program(data: WebsiteProgramCreate):
+    obj = WebsiteProgram(**data.model_dump())
+    doc = obj.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.website_programs.insert_one(doc)
+    return obj
+
+@api_router.put("/website/programs/{program_id}")
+async def update_website_program(program_id: str, data: WebsiteProgramCreate):
+    result = await db.website_programs.update_one(
+        {"id": program_id},
+        {"$set": data.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Program not found")
+    return await db.website_programs.find_one({"id": program_id}, {"_id": 0})
+
+@api_router.delete("/website/programs/{program_id}")
+async def delete_website_program(program_id: str):
+    result = await db.website_programs.delete_one({"id": program_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Program not found")
+    return {"message": "Deleted"}
+
+
+# ── Website Stats Routes ─────────────────────────────────────────────────────
+
+@api_router.get("/website/stats")
+async def get_website_stats():
+    config = await db.website_config.find_one({"key": "stats"}, {"_id": 0})
+    if config:
+        return config.get("stats", DEFAULT_WEBSITE_STATS)
+    return DEFAULT_WEBSITE_STATS
+
+@api_router.put("/website/stats")
+async def update_website_stats(stats: List[WebsiteStat]):
+    data = [s.model_dump() for s in stats]
+    await db.website_config.update_one(
+        {"key": "stats"},
+        {"$set": {"key": "stats", "stats": data}},
+        upsert=True
+    )
+    return data
+
+
 app.include_router(api_router)
 
 app.add_middleware(

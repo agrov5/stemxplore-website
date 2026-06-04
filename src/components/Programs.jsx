@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import styles from './Programs.module.css'
 import legoImg from '../assets/lego-rob.webp'
 import ev3Img from '../assets/ev3-robot.webp'
@@ -7,7 +8,7 @@ import aiKidsImg from '../assets/ai-for-kids.webp'
 import quarkyInnoImg from '../assets/quarky-innovator.webp'
 import appDevImg from '../assets/app-dev.webp'
 
-const PROGRAMS = [
+const FALLBACK_PROGRAMS = [
   {
     img: legoImg,
     badge: 'Beginner · Ages 5+',
@@ -66,35 +67,70 @@ const PROGRAMS = [
   },
 ]
 
+function normalizePrograms(data) {
+  return data.map(p => ({
+    img: p.image_url || null,
+    badge: p.badge || '',
+    title: p.title,
+    desc: p.description || '',
+    highlights: Array.isArray(p.highlights) ? p.highlights : [],
+    color: p.color || '#1a5fa8',
+  }))
+}
+
 export default function Programs() {
+  const [programs, setPrograms] = useState(FALLBACK_PROGRAMS)
+  const [count, setCount] = useState(FALLBACK_PROGRAMS.length)
+
+  useEffect(() => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
+    fetch(`${backendUrl}/api/website/programs`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPrograms(normalizePrograms(data))
+          setCount(data.length)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <section id="programs" className={styles.section}>
       <div className={styles.inner}>
         <div className={styles.header}>
           <p className={styles.eyebrow}>What We Offer</p>
-          <h2 className={styles.heading}>7 Specialized Courses for Every Learner</h2>
+          <h2 className={styles.heading}>{count} Specialized Course{count !== 1 ? 's' : ''} for Every Learner</h2>
           <p className={styles.sub}>
             From first LEGO builds to AI and app development — 24-hour hands-on courses for every skill level and age group.
           </p>
         </div>
 
         <div className={styles.grid}>
-          {PROGRAMS.map(p => (
+          {programs.map(p => (
             <div key={p.title} className={styles.card} style={{ '--accent': p.color }}>
               <div className={styles.imgWrap}>
-                <img src={p.img} alt={p.title} className={styles.courseImg} loading="lazy" />
-                <span className={styles.badge}>{p.badge}</span>
+                {p.img ? (
+                  <img src={p.img} alt={p.title} className={styles.courseImg} loading="lazy" />
+                ) : (
+                  <div className={styles.courseImg} style={{ background: `${p.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '2rem' }}>📚</span>
+                  </div>
+                )}
+                {p.badge && <span className={styles.badge}>{p.badge}</span>}
               </div>
               <div className={styles.cardBody}>
                 <h3 className={styles.cardTitle}>{p.title}</h3>
                 <p className={styles.cardDesc}>{p.desc}</p>
-                <ul className={styles.highlights}>
-                  {p.highlights.map(h => (
-                    <li key={h}>
-                      <span className={styles.check}>✓</span> {h}
-                    </li>
-                  ))}
-                </ul>
+                {p.highlights.length > 0 && (
+                  <ul className={styles.highlights}>
+                    {p.highlights.map(h => (
+                      <li key={h}>
+                        <span className={styles.check}>✓</span> {h}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           ))}

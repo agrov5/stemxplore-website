@@ -203,4 +203,19 @@ export const api = {
 
   // Test Data
   seedTestData: () => axios.post(`${API_BASE}/seed-test-data`, {}, { headers: getAuthHeader() }),
+
+  // Website Manager – Gallery
+  getGallery: () => axios.get(`${API_BASE}/website/gallery`),
+  addGalleryItem: (data) => axios.post(`${API_BASE}/website/gallery`, data, { headers: getAuthHeader() }),
+  deleteGalleryItem: (id) => axios.delete(`${API_BASE}/website/gallery/${id}`, { headers: getAuthHeader() }),
+
+  // Website Manager – Programs / Courses
+  getWebsitePrograms: () => axios.get(`${API_BASE}/website/programs`),
+  createWebsiteProgram: (data) => axios.post(`${API_BASE}/website/programs`, data, { headers: getAuthHeader() }),
+  updateWebsiteProgram: (id, data) => axios.put(`${API_BASE}/website/programs/${id}`, data, { headers: getAuthHeader() }),
+  deleteWebsiteProgram: (id) => axios.delete(`${API_BASE}/website/programs/${id}`, { headers: getAuthHeader() }),
+
+  // Website Manager – Stats
+  getWebsiteStats: () => axios.get(`${API_BASE}/website/stats`),
+  updateWebsiteStats: (stats) => axios.put(`${API_BASE}/website/stats`, stats, { headers: getAuthHeader() }),
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
-import { Home, Users, BookOpen, Calendar, DollarSign, FileText, UserCircle, LogOut, GraduationCap, CalendarDays, Megaphone, UserCheck, Settings as SettingsIcon, Menu, X, Upload, TrendingDown, BarChart3, ShieldCheck } from 'lucide-react';
+import { Home, Users, BookOpen, Calendar, DollarSign, FileText, UserCircle, LogOut, GraduationCap, CalendarDays, Megaphone, UserCheck, Settings as SettingsIcon, Menu, X, Upload, TrendingDown, BarChart3, ShieldCheck, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Sidebar = () => {
@@ -53,6 +53,7 @@ const Sidebar = () => {
     { path: '/announcements', icon: Megaphone, label: 'Announcements', roles: ['admin', 'teacher', 'student'] },
     { path: '/import', icon: Upload, label: 'Import Data', roles: ['admin'] },
     { path: '/users', icon: ShieldCheck, label: 'User Management', roles: ['admin'] },
+    { path: '/website', icon: Globe, label: 'Website', roles: ['admin'] },
     { path: '/settings', icon: SettingsIcon, label: 'Settings', roles: ['admin'] },
   ];
 
