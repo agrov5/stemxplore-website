@@ -9,6 +9,7 @@ import Values from './components/Values'
 import Trainer from './components/Trainer'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import PDDayBanner from './components/PDDayBanner'
 import EduLynkApp from './edylynk/App.jsx'
 
 const isEduLynk = window.location.pathname.startsWith('/EduLynk')
@@ -21,6 +22,7 @@ function App() {
   return (
     <div className="app">
       <Navbar />
+      <PDDayBanner />
       <Hero />
       <Stats />
       <About />

@@ -1,7 +1,54 @@
-import { Phone, MessageCircle, Calendar } from 'lucide-react'
+import { useState } from 'react'
 import styles from './Contact.module.css'
 
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001'
+
+const PROGRAMS = [
+  'Lego Robotics (Ages 5+)',
+  'EV3 Robotics (Ages 9+)',
+  'Scratch Coding (Ages 5+)',
+  'Quarky Creator (Ages 5+)',
+  'AI for Kids (Ages 9+)',
+  'Quarky Innovator (Ages 5+)',
+  'App Development (Ages 9+)',
+]
+
 export default function Contact() {
+  const [form, setForm] = useState({
+    parent_name: '', child_name: '', child_age: '', email: '', phone: '', program: '', message: '',
+  })
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+
+  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    if (!form.parent_name || !form.child_name || !form.phone) {
+      setError('Please fill in Parent Name, Child Name, and Phone Number.')
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await fetch(`${BACKEND}/api/website/book-demo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          child_age: Number(form.child_age) || 0,
+        }),
+      })
+      if (!res.ok) throw new Error('Request failed')
+      setSubmitted(true)
+    } catch {
+      setError('Something went wrong. Please call us at +1 (613) 298-7836 to book.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <section id="contact" className={styles.section}>
       <div className={styles.inner}>
@@ -12,73 +59,64 @@ export default function Contact() {
             Book a free demo session or reach out to speak with one of our instructors. We'd love to find the perfect program for your child.
           </p>
 
-          <div className={styles.contacts}>
-            <a href="tel:+16132987836" className={styles.contactItem}>
-              <div className={styles.contactIcon}><Phone size={20} /></div>
-              <div>
-                <div className={styles.contactLabel}>Call Us</div>
-                <div className={styles.contactValue}>+1 (613) 298-7836</div>
-              </div>
-            </a>
-            <a href="https://wa.me/16132987836" target="_blank" rel="noopener noreferrer" className={styles.contactItem}>
-              <div className={styles.contactIcon} style={{ '--ic': '#25D366' }}><MessageCircle size={20} /></div>
-              <div>
-                <div className={styles.contactLabel}>WhatsApp</div>
-                <div className={styles.contactValue}>+1 (613) 298-7836</div>
-              </div>
-            </a>
-            <a href="https://stemxplore.ca" target="_blank" rel="noopener noreferrer" className={styles.contactItem}>
-              <div className={styles.contactIcon} style={{ '--ic': 'var(--accent)' }}><Calendar size={20} /></div>
-              <div>
-                <div className={styles.contactLabel}>Book Online</div>
-                <div className={styles.contactValue}>stemxplore.ca</div>
-              </div>
-            </a>
-          </div>
         </div>
 
         <div className={styles.right}>
           <div className={styles.formCard}>
             <h3 className={styles.formTitle}>Book a Free Demo</h3>
-            <form className={styles.form} onSubmit={e => e.preventDefault()}>
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label>Parent Name</label>
-                  <input type="text" placeholder="Jane Smith" />
+
+            {submitted ? (
+              <div className={styles.successBox}>
+                <div className={styles.successIcon}>✓</div>
+                <h4>Booking Received!</h4>
+                <p>We'll be in touch shortly to confirm your free demo class. Can't wait to meet your family!</p>
+                <button className={styles.submitAlt} onClick={() => { setSubmitted(false); setForm({ parent_name: '', child_name: '', child_age: '', email: '', phone: '', program: '', message: '' }) }}>
+                  Book Another
+                </button>
+              </div>
+            ) : (
+              <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label>Parent Name *</label>
+                    <input type="text" placeholder="Jane Smith" value={form.parent_name} onChange={set('parent_name')} />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Child's Name *</label>
+                    <input type="text" placeholder="Alex Smith" value={form.child_name} onChange={set('child_name')} />
+                  </div>
+                </div>
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label>Child's Age</label>
+                    <input type="number" placeholder="e.g. 8" min="2" max="18" value={form.child_age} onChange={set('child_age')} />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Phone Number *</label>
+                    <input type="tel" placeholder="+1 (555) 000-0000" value={form.phone} onChange={set('phone')} />
+                  </div>
                 </div>
                 <div className={styles.field}>
-                  <label>Child's Age</label>
-                  <input type="number" placeholder="e.g. 8" min="2" max="18" />
+                  <label>Email Address</label>
+                  <input type="email" placeholder="jane@example.com" value={form.email} onChange={set('email')} />
                 </div>
-              </div>
-              <div className={styles.field}>
-                <label>Email Address</label>
-                <input type="email" placeholder="jane@example.com" />
-              </div>
-              <div className={styles.field}>
-                <label>Phone Number</label>
-                <input type="tel" placeholder="+1 (555) 000-0000" />
-              </div>
-              <div className={styles.field}>
-                <label>Interested Program</label>
-                <select>
-                  <option value="">Select a program...</option>
-                  <option>Little Builders (Ages 2+)</option>
-                  <option>Junior Coders (Ages 5+)</option>
-                  <option>Tech Explorers (Ages 9+)</option>
-                  <option>Competition Prep</option>
-                  <option>Project Management</option>
-                  <option>Instructor Training</option>
-                </select>
-              </div>
-              <div className={styles.field}>
-                <label>Message (optional)</label>
-                <textarea placeholder="Tell us about your child's interests..." rows={3} />
-              </div>
-              <button type="submit" className={styles.submit}>
-                Book My Free Demo →
-              </button>
-            </form>
+                <div className={styles.field}>
+                  <label>Interested Program</label>
+                  <select value={form.program} onChange={set('program')}>
+                    <option value="">Select a program…</option>
+                    {PROGRAMS.map(p => <option key={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label>Message (optional)</label>
+                  <textarea placeholder="Tell us about your child's interests…" rows={3} value={form.message} onChange={set('message')} />
+                </div>
+                {error && <p className={styles.errorMsg}>{error}</p>}
+                <button type="submit" className={styles.submit} disabled={submitting}>
+                  {submitting ? 'Sending…' : 'Book My Free Demo →'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>

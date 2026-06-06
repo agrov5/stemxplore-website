@@ -75,10 +75,7 @@ export default function Footer() {
           </div>
           <div className={styles.col}>
             <h4>Contact</h4>
-            <a href="tel:+16132987836">+1 (613) 298-7836</a>
-            <a href="https://wa.me/16132987836" target="_blank" rel="noopener noreferrer">WhatsApp</a>
             <a href="#contact">Book a Demo</a>
-            <a href="https://stemxplore.ca" target="_blank" rel="noopener noreferrer">Newsletter</a>
           </div>
         </div>
       </div>

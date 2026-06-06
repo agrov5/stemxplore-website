@@ -4663,6 +4663,32 @@ async def run_reminders_now():
     return {"message": "Reminder pass complete"}
 
 
+# ── Twilio (optional — SMS notifications) ──────────────────────────────────
+
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN  = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
+TWILIO_TO_NUMBER   = os.environ.get('TWILIO_TO_NUMBER', '+16132987836')
+
+try:
+    from twilio.rest import Client as TwilioClient
+    _twilio_available = True
+except ImportError:
+    _twilio_available = False
+
+def _send_sms(body: str) -> bool:
+    if not _twilio_available or not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER]):
+        logging.warning("Twilio not configured – SMS skipped")
+        return False
+    try:
+        tc = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        tc.messages.create(body=body, from_=TWILIO_FROM_NUMBER, to=TWILIO_TO_NUMBER)
+        return True
+    except Exception as exc:
+        logging.error(f"Twilio send failed: {exc}")
+        return False
+
+
 # ── Website Manager Models ──────────────────────────────────────────────────
 
 class GalleryItemCreate(BaseModel):
@@ -4699,6 +4725,24 @@ DEFAULT_WEBSITE_STATS = [
     {"id": "stat-3", "value": 10, "suffix": "+", "label": "Courses Offered"},
     {"id": "stat-4", "value": 4, "suffix": " Age Groups", "label": "Served"},
 ]
+
+class PDDayCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    note: str = ""
+
+class PDDay(PDDayCreate):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class BookDemoRequest(BaseModel):
+    parent_name: str
+    child_name: str
+    child_age: int
+    email: str
+    phone: str
+    program: str = ""
+    message: str = ""
+    pd_day: Optional[str] = None
 
 
 # ── Website Gallery Routes ───────────────────────────────────────────────────
@@ -4775,6 +4819,57 @@ async def update_website_stats(stats: List[WebsiteStat]):
         upsert=True
     )
     return data
+
+
+# ── PD Days Routes ───────────────────────────────────────────────────────────
+
+@api_router.get("/website/pd-days")
+async def get_pd_days():
+    days = await db.pd_days.find({}, {"_id": 0}).sort("date", 1).to_list(500)
+    return days
+
+@api_router.post("/website/pd-days")
+async def create_pd_day(data: PDDayCreate):
+    existing = await db.pd_days.find_one({"date": data.date})
+    if existing:
+        raise HTTPException(status_code=400, detail="PD Day already exists for this date")
+    obj = PDDay(**data.model_dump())
+    doc = obj.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.pd_days.insert_one(doc)
+    return obj
+
+@api_router.delete("/website/pd-days/{pd_day_id}")
+async def delete_pd_day(pd_day_id: str):
+    result = await db.pd_days.delete_one({"id": pd_day_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="PD Day not found")
+    return {"message": "Deleted"}
+
+
+# ── Book Demo Class Route ────────────────────────────────────────────────────
+
+@api_router.post("/website/book-demo")
+async def book_demo(data: BookDemoRequest):
+    booking_doc = {
+        **data.model_dump(),
+        "id": str(uuid.uuid4()),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.demo_bookings.insert_one(booking_doc)
+
+    pd_line = f"\nPD Day: {data.pd_day}" if data.pd_day else ""
+    sms_body = (
+        f"New Demo Booking!\n"
+        f"Child: {data.child_name}, Age {data.child_age}\n"
+        f"Parent: {data.parent_name}\n"
+        f"Phone: {data.phone}\n"
+        f"Email: {data.email}\n"
+        f"Program: {data.program or 'Not specified'}{pd_line}\n"
+        f"Notes: {data.message or 'None'}"
+    )
+    await asyncio.to_thread(_send_sms, sms_body)
+    return {"success": True}
 
 
 app.include_router(api_router)

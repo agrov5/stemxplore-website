@@ -218,4 +218,12 @@ export const api = {
   // Website Manager – Stats
   getWebsiteStats: () => axios.get(`${API_BASE}/website/stats`),
   updateWebsiteStats: (stats) => axios.put(`${API_BASE}/website/stats`, stats, { headers: getAuthHeader() }),
+
+  // Website Manager – PD Days
+  getPDDays: () => axios.get(`${API_BASE}/website/pd-days`),
+  createPDDay: (data) => axios.post(`${API_BASE}/website/pd-days`, data, { headers: getAuthHeader() }),
+  deletePDDay: (id) => axios.delete(`${API_BASE}/website/pd-days/${id}`, { headers: getAuthHeader() }),
+
+  // Book Demo Class (public)
+  bookDemo: (data) => axios.post(`${API_BASE}/website/book-demo`, data),
 };

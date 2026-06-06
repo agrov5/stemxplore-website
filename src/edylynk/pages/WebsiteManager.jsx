@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
-import { Trash2, Plus, Image, Video, BookOpen, BarChart2, Edit2, Check, X, Download } from 'lucide-react';
+import { Trash2, Plus, Image, Video, BookOpen, BarChart2, Edit2, Check, X, Download, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,7 +34,7 @@ function hexAlpha(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-const TABS = ['Gallery', 'Courses', 'Stats'];
+const TABS = ['Gallery', 'Courses', 'Stats', 'PD Days'];
 
 // ── Gallery Tab ──────────────────────────────────────────────────────────────
 function GalleryTab() {
@@ -509,6 +509,149 @@ function StatsTab() {
   );
 }
 
+// ── PD Days Tab ───────────────────────────────────────────────────────────────
+function PDDaysTab() {
+  const [days, setDays] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState('');
+  const [note, setNote] = useState('');
+  const [adding, setAdding] = useState(false);
+
+  useEffect(() => { fetchDays(); }, []);
+
+  const fetchDays = async () => {
+    try {
+      const res = await api.getPDDays();
+      setDays(res.data);
+    } catch { toast.error('Failed to load PD days'); }
+    finally { setLoading(false); }
+  };
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!date) return toast.error('Date is required');
+    setAdding(true);
+    try {
+      await api.createPDDay({ date, note });
+      toast.success('PD Day added');
+      setDate('');
+      setNote('');
+      fetchDays();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || 'Failed to add PD Day');
+    } finally { setAdding(false); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Remove this PD Day?')) return;
+    try {
+      await api.deletePDDay(id);
+      toast.success('Removed');
+      setDays(prev => prev.filter(d => d.id !== id));
+    } catch { toast.error('Failed to remove'); }
+  };
+
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = days.filter(d => d.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const past = days.filter(d => d.date < today).sort((a, b) => b.date.localeCompare(a.date));
+
+  const fmt = (dateStr) => new Date(dateStr + 'T12:00:00').toLocaleDateString('en-CA', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+
+  const daysUntil = (dateStr) => {
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const diff = Math.round((new Date(dateStr + 'T00:00:00') - now) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    if (diff < 0) return `${Math.abs(diff)} days ago`;
+    return `In ${diff} days`;
+  };
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-slate-500">
+        Dates added here will trigger a booking banner on the public STEMXplore website for visitors to book a demo class.
+      </p>
+
+      {/* Add form */}
+      <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <h3 className="font-semibold text-slate-800 mb-4">Add a PD Day</h3>
+        <form onSubmit={handleAdd} className="flex flex-wrap gap-3 items-end">
+          <div className="space-y-1">
+            <Label>Date *</Label>
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-44" />
+          </div>
+          <div className="space-y-1 flex-1 min-w-48">
+            <Label>Note (optional)</Label>
+            <Input placeholder="e.g. Ottawa school board PD day" value={note} onChange={e => setNote(e.target.value)} />
+          </div>
+          <Button type="submit" disabled={adding}>
+            <Plus size={16} className="mr-1" />{adding ? 'Adding…' : 'Add PD Day'}
+          </Button>
+        </form>
+      </div>
+
+      {loading ? (
+        <p className="text-slate-500">Loading…</p>
+      ) : days.length === 0 ? (
+        <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
+          <CalendarDays size={36} className="mx-auto text-slate-300 mb-3" />
+          <p className="text-slate-500 font-medium">No PD Days added yet</p>
+          <p className="text-slate-400 text-sm mt-1">Add a date above — the website banner will activate automatically.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {upcoming.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Upcoming</h4>
+              <div className="space-y-2">
+                {upcoming.map(d => (
+                  <div key={d.id} className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+                    <div>
+                      <span className="font-semibold text-slate-800">{fmt(d.date)}</span>
+                      {d.note && <span className="ml-2 text-sm text-slate-500">— {d.note}</span>}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${d.date === today ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {daysUntil(d.date)}
+                      </span>
+                      <button onClick={() => handleDelete(d.id)} className="text-red-400 hover:text-red-600 transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {past.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Past</h4>
+              <div className="space-y-2">
+                {past.map(d => (
+                  <div key={d.id} className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 opacity-60">
+                    <div>
+                      <span className="font-medium text-slate-600">{fmt(d.date)}</span>
+                      {d.note && <span className="ml-2 text-sm text-slate-400">— {d.note}</span>}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-slate-400">{daysUntil(d.date)}</span>
+                      <button onClick={() => handleDelete(d.id)} className="text-red-300 hover:text-red-500 transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function WebsiteManager() {
   const [activeTab, setActiveTab] = useState('Gallery');
@@ -536,6 +679,7 @@ export default function WebsiteManager() {
               {tab === 'Gallery' && <Image size={15} />}
               {tab === 'Courses' && <BookOpen size={15} />}
               {tab === 'Stats' && <BarChart2 size={15} />}
+              {tab === 'PD Days' && <CalendarDays size={15} />}
               {tab}
             </button>
           ))}
@@ -545,6 +689,7 @@ export default function WebsiteManager() {
         {activeTab === 'Gallery' && <GalleryTab />}
         {activeTab === 'Courses' && <CoursesTab />}
         {activeTab === 'Stats' && <StatsTab />}
+        {activeTab === 'PD Days' && <PDDaysTab />}
       </div>
     </DashboardLayout>
   );
